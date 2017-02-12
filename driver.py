@@ -6,15 +6,16 @@ import time
 import resource
 
 class Node:
-    def __init__(self, state, parent, direction, cost):
+    def __init__(self, state, parent, direction, cost, depth):
         self.state = state
         self.parent = parent
         self.direction = direction
         self.cost = cost
+        self.depth = depth
 
 
-def create_Node(state, parent, direction, cost):
-    return Node(state, parent, direction, cost)
+def create_Node(state, parent, direction, cost, depth):
+    return Node(state, parent, direction, cost, depth)
 
 
 
@@ -38,7 +39,7 @@ def create_Frontier(node_state):
         temp = state[pos - 3]
         new_State[pos - 3] = state[pos]
         new_State[pos] = temp
-        new_Node = create_Node(new_State, node_state, "Up", 1)
+        new_Node = create_Node(new_State, node_state, "Up", 1, node_state.depth + 1)
         frontier_Nodes.append(new_Node)
    #     print("up", new_State)
         new_State = list(state)
@@ -48,7 +49,7 @@ def create_Frontier(node_state):
         temp = state[pos + 3]
         new_State[pos + 3] = state[pos]
         new_State[pos] = temp
-        new_Node = create_Node(new_State, node_state, "Down", 1)
+        new_Node = create_Node(new_State, node_state, "Down", 1, node_state.depth + 1)
         frontier_Nodes.append(new_Node)
   #      print("down", new_State)
         new_State = list(state)
@@ -58,7 +59,7 @@ def create_Frontier(node_state):
         temp = state[pos - 1]
         new_State[pos - 1] = state[pos]
         new_State[pos] = temp
-        new_Node = create_Node(new_State, node_state, "Left", 1)
+        new_Node = create_Node(new_State, node_state, "Left", 1, node_state.depth + 1)
         frontier_Nodes.append(new_Node)
  #       print("left", new_State)
         new_State = list(state)
@@ -68,7 +69,7 @@ def create_Frontier(node_state):
         temp = state[pos + 1]
         new_State[pos + 1] = state[pos]
         new_State[pos] = temp
-        new_Node = create_Node(new_State, node_state, "Right", 1)
+        new_Node = create_Node(new_State, node_state, "Right", 1, node_state.depth + 1)
         frontier_Nodes.append(new_Node) 
  #       print("right", new_State)
     
@@ -85,7 +86,7 @@ def bfs(initial_State, goal_Test):
     begin = 1
     nodes_expanded = 0
     max_depth = 0
-    init_Node = create_Node(initial_State, None, 0, 0)
+    init_Node = create_Node(initial_State, None, 0, 0, 0)
     frontier.append(init_Node)
     max_fringe_size = 0
 
@@ -93,13 +94,13 @@ def bfs(initial_State, goal_Test):
  
         if len(frontier) > max_fringe_size:
             max_fringe_size = len(frontier)
+ 
         state = frontier.pop(0)
-    #    explored.append(state.state)
         test_State = list(map(int, state.state))
         explored_State = ''.join(map(str, test_State))
         explored.add(explored_State)
-    #    test_Frontier = []
-        
+
+
 
         if test_State == goal_Test:
             stop = time.time()
@@ -117,9 +118,7 @@ def bfs(initial_State, goal_Test):
                 depth += 1
                 state = state.parent
                
-            while last_node and last_node.parent != None:
-                max_depth += 1
-                last_node = last_node.parent
+            max_depth = last_node.depth
 
             ram = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000
             
@@ -160,7 +159,7 @@ def dfs(initial_State, goal_Test):
     begin = 1
     nodes_expanded = 0
     max_depth = 0
-    init_Node = create_Node(initial_State, None, 0, 0)
+    init_Node = create_Node(initial_State, None, 0, 0, 0)
     frontier.append(init_Node)
     max_fringe_size = 0
 
@@ -174,24 +173,13 @@ def dfs(initial_State, goal_Test):
         test_State = list(map(int, state.state))
         explored_State = ''.join(map(str, state.state))
         explored.add(explored_State)
-  #      print("explored", explored)   
-  #      print("state", state)
-  #      print("parent", state.parent)
-        count = 0
-#        while state and state.parent !=  None:
-#            count +=1
-#            state = state.parent
-       
- #       if max_depth < count:
- #           print("enters")
- #           print("count", count)
- #           max_depth = count
-
 
         if not begin:
             test_Frontier.remove(explored_State)
-             
- #       print("test state", test_State)   
+ 
+        if max_depth < state.depth:
+            max_depth = state.depth
+
         if test_State == goal_Test:
             stop = time.time()
             running_time = stop - start
@@ -208,9 +196,6 @@ def dfs(initial_State, goal_Test):
                 depth += 1
                 state = state.parent
                
-	#    while last_node and last_node.parent != None:
-	#        max_depth += 1
-	#        last_node = last_node.parent
 
             ram = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000
             
@@ -238,11 +223,14 @@ def dfs(initial_State, goal_Test):
                     test_Frontier.add(neighbor_State)
                     frontier.append(neighbor[index])
       
-                         
+
+# def ast(initial_State, goal_Test):
 
 
-def output_file(path, cost, expanded, fringe, max_fringe, depth, max_depth,
-	time, ram):
+
+
+
+def output_file(path, cost, expanded, fringe, max_fringe, depth, max_depth, time, ram):
     output = open("output.txt", "w")
 
     output.write("path_to_goal: " + str(path) + '\n' + "cost_of_path: " +
@@ -256,7 +244,7 @@ def main():
     initial_State = sys.argv[2]
     initial_State = initial_State.split(',')
     goal_Test = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    dfs(initial_State, goal_Test)
+    bfs(initial_State, goal_Test)
 
 
 if __name__ == "__main__":
