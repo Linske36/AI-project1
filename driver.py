@@ -151,7 +151,6 @@ def bfs(initial_State, goal_Test):
 
 
 def dfs(initial_State, goal_Test):
-
     start = time.time()
     frontier = []
     explored = set()
@@ -243,8 +242,14 @@ def output_file(path, cost, expanded, fringe, max_fringe, depth, max_depth, time
 def main():
     initial_State = sys.argv[2]
     initial_State = initial_State.split(',')
-    goal_Test = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    bfs(initial_State, goal_Test)
+    goal_Test = list(map(int, initial_State))
+    goal_Test.sort()
+
+    if sys.argv[1] == "bfs":
+        bfs(initial_State, goal_Test)
+    elif sys.argv[1] == "dfs":
+        dfs(initial_State, goal_Test)
+
 
 
 if __name__ == "__main__":
