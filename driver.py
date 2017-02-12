@@ -267,7 +267,6 @@ def ast(initial_State, goal_Test):
     current_cost = {}
     current_cost[init_Node] = 0
 
-    print("makes it before while", frontier)
 
     while frontier:
  
@@ -276,13 +275,9 @@ def ast(initial_State, goal_Test):
         
          	
         state = frontier.get()
-        print("state", state)
-        print("frontier", frontier)
         test_State = list(map(int, state.state))
         explored_State = ''.join(map(str, state.state))
         explored.add(explored_State)
-        print("test state", test_State)
-        cost = print("cost", manhattan_Distance(test_State, goal_Test))
 
         if not begin:
             test_Frontier.remove(explored_State)
@@ -315,11 +310,9 @@ def ast(initial_State, goal_Test):
             return
 
         neighbor = create_Frontier(state)
-        print("frontier", frontier) 
         if not frontier and begin == 1:
             for index in range(len(neighbor)):
                 frontier_State = ''.join(map(str, neighbor[index].state))   
-                print("test front state", frontier_State)
                 frontier.put(neighbor[index], manhattan_Distance(neighbor[index], goal_Test))
                 test_Frontier.add(frontier_State)
             begin = 0
@@ -328,10 +321,10 @@ def ast(initial_State, goal_Test):
             
             for index in range(len(neighbor)):
                 neighbor_State = ''.join(map(str, neighbor[index].state))
-                
+                cost = manhattan_Distance(neighbor[index], goal_Test) + 1
                 if neighbor_State not in test_Frontier and neighbor_State not in explored:
                     test_Frontier.add(neighbor_State)
-                    frontier.append(neighbor[index])
+                    frontier.put(neighbor[index], cost)
 
 
 
@@ -356,8 +349,8 @@ def main():
         bfs(initial_State, goal_Test)
     elif sys.argv[1] == "dfs":
         dfs(initial_State, goal_Test)
-    elif sys.argv[1] == "ast":
-        ast(initial_State, goal_Test)
+#    elif sys.argv[1] == "ast":
+#        ast(initial_State, goal_Test)
 
 
 
