@@ -31,8 +31,17 @@ class PriorityQueue:
     def get(self):
         return heapq.heappop(self.elements)[1]
 
+    def len(self):
+        return len(self.elements)
 
-#def manhattan_Distance(goal_Test):
+
+def manhattan_Distance(state, goal_Test):
+    size = int(math.sqrt(len(state)))
+    for i in range(len(state)):
+        for val in range(len(state)):
+            if val:
+                sum += abs(val%size - i%size) + abs(val//size - i//size)
+    return sum
     
 
 
@@ -127,7 +136,7 @@ def bfs(initial_State, goal_Test):
 
         if test_State == goal_Test:
             stop = time.time()
-            running_time = stop - start
+            running_time = round((stop - start), 8)
             fringe_size = len(frontier)
             path = []
             cost = 0
@@ -143,7 +152,7 @@ def bfs(initial_State, goal_Test):
                
             max_depth = last_node.depth
 
-            ram = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000
+            ram = round((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/ 1000), 8)
             
             output_file(path, cost, nodes_expanded, fringe_size, max_fringe_size, depth, max_depth, running_time, ram)
 
@@ -202,7 +211,7 @@ def dfs(initial_State, goal_Test):
 
         if test_State == goal_Test:
             stop = time.time()
-            running_time = stop - start
+            running_time = round((stop - start), 8)
             fringe_size = len(frontier)
             path = []
             cost = 0
@@ -217,7 +226,7 @@ def dfs(initial_State, goal_Test):
                 state = state.parent
                
 
-            ram = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000
+            ram = round((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/ 1000), 8)
             
             output_file(path, cost, nodes_expanded, fringe_size, max_fringe_size, depth, max_depth, running_time, ram)
 
@@ -253,19 +262,27 @@ def ast(initial_State, goal_Test):
     nodes_expanded = 0
     max_depth = 0
     init_Node = create_Node(initial_State, None, 0, 0, 0)
-    frontier.put(init_Node)
+    frontier.put(init_Node, 0)
     max_fringe_size = 0
+    current_cost = {}
+    current_cost[init_Node] = 0
+
+    print("makes it before while", frontier)
 
     while frontier:
  
-        if len(frontier) > max_fringe_size:
-            max_fringe_size = len(frontier)
+        if frontier.len() > max_fringe_size:
+            max_fringe_size = frontier.len()
         
          	
-        state = frontier.pop()
+        state = frontier.get()
+        print("state", state)
+        print("frontier", frontier)
         test_State = list(map(int, state.state))
         explored_State = ''.join(map(str, state.state))
         explored.add(explored_State)
+        print("test state", test_State)
+        cost = print("cost", manhattan_Distance(test_State, goal_Test))
 
         if not begin:
             test_Frontier.remove(explored_State)
@@ -275,7 +292,7 @@ def ast(initial_State, goal_Test):
 
         if test_State == goal_Test:
             stop = time.time()
-            running_time = stop - start
+            running_time = round((stop - start), 8)
             fringe_size = len(frontier)
             path = []
             cost = 0
@@ -290,7 +307,7 @@ def ast(initial_State, goal_Test):
                 state = state.parent
                
 
-            ram = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000
+            ram = round((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/ 1000), 8)
             
             output_file(path, cost, nodes_expanded, fringe_size, max_fringe_size, depth, max_depth, running_time, ram)
 
@@ -298,12 +315,12 @@ def ast(initial_State, goal_Test):
             return
 
         neighbor = create_Frontier(state)
-        neighbor.reverse()  
-        
+        print("frontier", frontier) 
         if not frontier and begin == 1:
             for index in range(len(neighbor)):
-                frontier_State = ''.join(map(str, neighbor[index].state))    
-                frontier.append(neighbor[index])
+                frontier_State = ''.join(map(str, neighbor[index].state))   
+                print("test front state", frontier_State)
+                frontier.put(neighbor[index], manhattan_Distance(neighbor[index], goal_Test))
                 test_Frontier.add(frontier_State)
             begin = 0
   
@@ -339,6 +356,8 @@ def main():
         bfs(initial_State, goal_Test)
     elif sys.argv[1] == "dfs":
         dfs(initial_State, goal_Test)
+    elif sys.argv[1] == "ast":
+        ast(initial_State, goal_Test)
 
 
 
